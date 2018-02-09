@@ -12,6 +12,8 @@ class ViewController: UIViewController {
 
     @IBOutlet weak var decodedValue: UITextField!
     @IBOutlet weak var encodedValue: UITextField!
+    @IBOutlet weak var inputData: UITextField!
+    @IBOutlet weak var outputData: UITextView!
     
     @IBAction func encodeEnteredValue(_ sender: UITextField) {
         if let textToEncode = sender.text,
