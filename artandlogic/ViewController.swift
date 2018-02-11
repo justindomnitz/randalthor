@@ -83,10 +83,23 @@ class ViewController: UIViewController {
                             elements.append(Model.artandlogicDecode(from: inputDataElements[outerIndex] + inputDataElements[outerIndex + 1]) ?? 0)
                             outerIndex += 2
                         }
-                        outputString += " "
-                        let _ = elements.enumerated().map { index, element in
+                        //Make pairs.
+                        var pairs = [Drawing.Pair]()
+                        for (index, element) in elements.enumerated() {
                             let isEven = (index + 1) % 2 == 0
-                            outputString += (isEven ? ", " : "(") + String(element) + (isEven ? ") " : " ")
+                            if isEven {
+                                if pairs.count >= 1 {
+                                    //Absolute coordinates.
+                                    pairs.append(Drawing.Pair(dx: elements[index - 1] + pairs[pairs.count - 1].dx, dy: element + pairs[pairs.count - 1].dy))
+                                } else {
+                                    pairs.append(Drawing.Pair(dx: elements[index - 1], dy: element))
+                                }
+                            }
+                        }
+                        //Make output string.
+                        outputString += " "
+                        let _ = pairs.map {
+                            outputString += "(" + String($0.dx) + ", " + String($0.dy) + ") "
                         }
                         outputString = outputString.trimmingCharacters(in: .whitespaces)
                         outputString += ";\n"
@@ -100,7 +113,9 @@ class ViewController: UIViewController {
                 }
             }
         }
-        outputData.text = outputString
+        DispatchQueue.main.async {
+            self.outputData.text = outputString
+        }
     }
 
 }

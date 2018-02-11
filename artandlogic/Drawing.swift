@@ -11,8 +11,8 @@ import UIKit
 class Drawing: NSObject {
 
     struct Pair {
-        var dx: CGFloat
-        var dy: CGFloat
+        var dx: Int
+        var dy: Int
     }
 
     /*
@@ -96,10 +96,15 @@ class Drawing: NSObject {
      Change the location of the pen relative to its current location. If the pen is down, draw in the current color. If multiple (x, y) points are provided as parameters, each point moved to becomes the new current location in turn.
      Also note that the values used in your output should be absolute coordinates in the drawing space, not the relative coordinates used in the encoded movement commands.
      For example, after clearing a drawing, the current location is the origin at (0, 0). If the pen is moved (10, 10) and then (5, -5), the last location of the pen will be at (15, 5). For the purposes of this exercise, the string output would be
+     
      MV (10, 10) (15, 5);
+     
      if the pen is down, but just
+     
      MV (15, 5);
+     
      if the pen is up.
+     
      If the specified motion takes the pen outside the allowed bounds of (-8192, -8192) .. (8191, 8191), the pen should move until it crosses that boundary and then lift. When additional movement commands bring the pen back into the valid coordinate space, the pen should be placed down at the boundary and draw to the next position in the data file.
     */
     
