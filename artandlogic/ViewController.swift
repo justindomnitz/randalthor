@@ -36,5 +36,20 @@ class ViewController: UIViewController {
         }
     }
     
+    @IBAction func inputDataenteredValue(_ sender: UITextField) {
+        if let inputData = sender.text {
+            //print(inputData)
+            let inputDataElements = Model.split(inputData, 4)
+            for inputDataElement in inputDataElements {
+                //print(inputDataElement)
+                if let decodedInt = Model.artandlogicDecode(from: inputDataElement) {
+                    print(String(decodedInt))
+                } else {
+                    print("ERROR")
+                }
+            }
+        }
+    }
+
 }
 

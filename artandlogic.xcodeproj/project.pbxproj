@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		F5DCBDB5202E001E002EAD93 /* Drawing.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5DCBDB4202E001E002EAD93 /* Drawing.swift */; };
 		F5F2DAAC1FFA640900104ADA /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5F2DAAB1FFA640900104ADA /* AppDelegate.swift */; };
 		F5F2DAAE1FFA640900104ADA /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5F2DAAD1FFA640900104ADA /* ViewController.swift */; };
 		F5F2DAB11FFA640900104ADA /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = F5F2DAAF1FFA640900104ADA /* Main.storyboard */; };
@@ -16,6 +17,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		F5DCBDB4202E001E002EAD93 /* Drawing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Drawing.swift; sourceTree = "<group>"; };
 		F5F2DAA81FFA640900104ADA /* artandlogic.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = artandlogic.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F5F2DAAB1FFA640900104ADA /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		F5F2DAAD1FFA640900104ADA /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -59,6 +61,7 @@
 				F5F2DAAB1FFA640900104ADA /* AppDelegate.swift */,
 				F5F2DAAD1FFA640900104ADA /* ViewController.swift */,
 				F5F2DABD1FFA644900104ADA /* Model.swift */,
+				F5DCBDB4202E001E002EAD93 /* Drawing.swift */,
 				F5F2DAAF1FFA640900104ADA /* Main.storyboard */,
 				F5F2DAB21FFA640900104ADA /* Assets.xcassets */,
 				F5F2DAB41FFA640900104ADA /* LaunchScreen.storyboard */,
@@ -139,6 +142,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F5DCBDB5202E001E002EAD93 /* Drawing.swift in Sources */,
 				F5F2DABE1FFA644900104ADA /* Model.swift in Sources */,
 				F5F2DAAE1FFA640900104ADA /* ViewController.swift in Sources */,
 				F5F2DAAC1FFA640900104ADA /* AppDelegate.swift in Sources */,

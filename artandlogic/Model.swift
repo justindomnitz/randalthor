@@ -23,7 +23,7 @@ class Model: NSObject {
             //Loop through each byte.
             for (byteIndex, dataSet) in dataSets.enumerated() {
                 
-                print("Examining byte \(byteIndex) decimal value \(dataSet).")
+                //print("Examining byte \(byteIndex) decimal value \(dataSet).")
                 
                 //Set the value.
                 packet[byteIndex] = dataSet
@@ -41,7 +41,7 @@ class Model: NSObject {
                     //Find the most significant bit.
                     let bitmask:UInt8 = 1 << 7
                     if dataSet & bitmask > 0 {
-                        print("The current significant digit of byte \(byteIndex) is 7.")
+                        //print("The current significant digit of byte \(byteIndex) is 7.")
                         if byteIndex == 0 { //Carry over from the first byte.
                             packet[byteIndex] &= ~bitmask //Clear the most significant bit.
                             carryOver = true
@@ -63,7 +63,7 @@ class Model: NSObject {
             var byteIndex = dataSets.count - 1
             for dataSet in dataSets {
                 
-                print("Examining byte \(byteIndex) decimal value \(dataSet).")
+                //print("Examining byte \(byteIndex) decimal value \(dataSet).")
                 
                 //Set the value.
                 packet[byteIndex] = dataSet
@@ -80,7 +80,7 @@ class Model: NSObject {
                 } else {
                     let bitmask:UInt8 = 1
                     if dataSet & bitmask > 0 {
-                        print("The least significant digit of byte \(byteIndex) is 0.")
+                        //print("The least significant digit of byte \(byteIndex) is 0.")
                         if byteIndex == 1 { //Carry over from the last byte.
                             carryOver = true
                         }
@@ -172,6 +172,14 @@ class Model: NSObject {
     static func fromByteArray<T>(_ value: [UInt8], _: T.Type) -> T {
         return value.withUnsafeBytes {
             $0.baseAddress!.load(as: T.self)
+        }
+    }
+    
+    static func split(_ str: String, _ count: Int) -> [String] {
+        return stride(from: 0, to: str.count, by: count).map { i -> String in
+            let startIndex = str.index(str.startIndex, offsetBy: i)
+            let endIndex   = str.index(startIndex, offsetBy: count, limitedBy: str.endIndex) ?? str.endIndex
+            return String(str[startIndex..<endIndex])
         }
     }
     
