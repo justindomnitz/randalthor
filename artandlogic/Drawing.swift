@@ -35,7 +35,7 @@ class Drawing: NSObject {
     */
     
     static func clear() {
-        
+        //TO DO
     }
     
     /*
@@ -55,7 +55,7 @@ class Drawing: NSObject {
     */
     
     static func penUpDown(up: Int) {
-        
+        //TO DO
     }
     
     /*
@@ -75,7 +75,9 @@ class Drawing: NSObject {
     */
     
     static func setColor(red: CGFloat, green: CGFloat, blue: CGFloat, alpha: CGFloat) {
-        let _ = UIColor(red: red, green: green, blue: blue, alpha: alpha)
+        //Swift example...
+        //let _ = UIColor(red: red, green: green, blue: blue, alpha: alpha)
+        //TO DO
     }
     
     /*
@@ -102,6 +104,21 @@ class Drawing: NSObject {
     */
     
     static func movePen(pairs: [Pair]) {
-        
+        //TO DO
+    }
+    
+    static func command(input: String) -> String? {
+        switch input {
+        case "F0":
+            return "CLR"
+        case "80":
+            return "PEN"
+        case "A0":
+            return "CO"
+        case "C0":
+            return "MV"
+        default:
+            return nil
+        }
     }
 }
