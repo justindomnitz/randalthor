@@ -38,6 +38,7 @@ class ViewController: UIViewController {
     
     @IBAction func inputDataenteredValue(_ sender: UITextField) {
         var outputString = ""
+        var lastPair: Drawing.Pair?
         if let inputData = sender.text?.removingWhitespacesAndNewlines() {
             let inputDataElements = Model.split(inputData, 2)
             var outerIndex = 0
@@ -75,7 +76,9 @@ class ViewController: UIViewController {
                         outputString += ";\n"
                     case "MV":
                         Drawing.movePen(pairs: [Drawing.Pair]())
-                        outputString += command
+                        var penUp = false
+                        var penChange = false
+                        outputString += command + " "
                         outerIndex += 1
                         var elements = [Int]()
                         while outerIndex + 1 < inputDataElements.count,
@@ -88,18 +91,53 @@ class ViewController: UIViewController {
                         for (index, element) in elements.enumerated() {
                             let isEven = (index + 1) % 2 == 0
                             if isEven {
-                                if pairs.count >= 1 {
+                                if let lastPair = lastPair {
+                                    if penChange {
+                                        penChange = false
+                                        outputString += "MV "
+                                    }
                                     //Absolute coordinates.
-                                    pairs.append(Drawing.Pair(dx: elements[index - 1] + pairs[pairs.count - 1].dx, dy: element + pairs[pairs.count - 1].dy))
+                                    pairs.append(Drawing.Pair(dx: elements[index - 1] + lastPair.dx, dy: element + lastPair.dy))
+                                    if pairs[pairs.count - 1].dx > 8191 {
+                                        pairs[pairs.count - 1].dx = 8191
+                                        outputString += "(" + String(pairs[pairs.count - 1].dx) + ", " + String(pairs[pairs.count - 1].dy) + ") "
+                                        outputString = outputString.trimmingCharacters(in: .whitespaces) + ";\nPEN UP;\n"
+                                        penUp = true
+                                        penChange = true
+                                    } else if pairs[pairs.count - 1].dx < -8192 {
+                                        pairs[pairs.count - 1].dx = -8191
+                                        outputString += "(" + String(pairs[pairs.count - 1].dx) + ", " + String(pairs[pairs.count - 1].dy) + ") "
+                                        outputString = outputString.trimmingCharacters(in: .whitespaces) + ";\nPEN UP;\n"
+                                        penUp = true
+                                        penChange = true
+                                    } else if pairs[pairs.count - 1].dy > 8191 {
+                                        pairs[pairs.count - 1].dy = 8191
+                                        outputString += "(" + String(pairs[pairs.count - 1].dx) + ", " + String(pairs[pairs.count - 1].dy) + ") "
+                                        outputString = outputString.trimmingCharacters(in: .whitespaces) + ";\nPEN UP;\n"
+                                        penUp = true
+                                        penChange = true
+                                    } else if pairs[pairs.count - 1].dy < -8192 {
+                                        pairs[pairs.count - 1].dy = -8191
+                                        outputString += "(" + String(pairs[pairs.count - 1].dx) + ", " + String(pairs[pairs.count - 1].dy) + ") "
+                                        outputString = outputString.trimmingCharacters(in: .whitespaces) + ";\nPEN UP;\n"
+                                        penUp = true
+                                        penChange = true
+                                    } else {
+                                        if penUp {
+                                            penUp = false
+                                            penChange = true
+                                            outputString += "(" + String(pairs[pairs.count - 1].dx) + ", " + String(pairs[pairs.count - 1].dy) + ");\nPEN DOWN;\n"
+                                        } else {
+                                            outputString += "(" + String(pairs[pairs.count - 1].dx) + ", " + String(pairs[pairs.count - 1].dy) + ") "
+                                        }
+                                    }
                                 } else {
                                     pairs.append(Drawing.Pair(dx: elements[index - 1], dy: element))
+                                    outputString += "(" + String(pairs[pairs.count - 1].dx) + ", " + String(pairs[pairs.count - 1].dy) + ") "
                                 }
+                                //Set last pair.
+                                lastPair = pairs[pairs.count - 1]
                             }
-                        }
-                        //Make output string.
-                        outputString += " "
-                        let _ = pairs.map {
-                            outputString += "(" + String($0.dx) + ", " + String($0.dy) + ") "
                         }
                         outputString = outputString.trimmingCharacters(in: .whitespaces)
                         outputString += ";\n"
