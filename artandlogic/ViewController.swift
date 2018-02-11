@@ -38,38 +38,47 @@ class ViewController: UIViewController {
     
     @IBAction func inputDataenteredValue(_ sender: UITextField) {
         var outputString = ""
-        if let inputData = sender.text?.trimmingCharacters(in: .whitespaces) {
+        if let inputData = sender.text?.removingWhitespacesAndNewlines() {
             let inputDataElements = Model.split(inputData, 2)
             var outerIndex = 0
             while outerIndex < inputDataElements.count {
                 if let command = Drawing.command(input: inputDataElements[outerIndex]) {
-                    outputString += command
-                    var elements = [Int]()
                     switch command {
                     case "CLR":
                         Drawing.clear()
+                        outputString += command
                         outputString +=  ";\n"
                         outerIndex += 1
                     case "PEN":
                         Drawing.penUpDown(up: 0)
+                        outputString += command
                         outerIndex += 1
-                        let element1 = Model.artandlogicDecode(from: inputDataElements[outerIndex] + inputDataElements[outerIndex + 1]) == 0 ? "UP" : "DOWN"
-                        outputString += " " + element1 + ";\n"
+                        if outerIndex + 1 < inputDataElements.count {
+                            let element = Model.artandlogicDecode(from: inputDataElements[outerIndex] + inputDataElements[outerIndex + 1]) == 0 ? "UP" : "DOWN"
+                            outputString += " " + element + ";\n"
+                        }
                         outerIndex += 2
                     case "CO":
                         Drawing.setColor(red: 0, green: 0, blue: 0, alpha: 0)
+                        outputString += command
                         outerIndex += 1
-                        for _ in 1...4 {
+                        var innerIndex = 0
+                        var elements = [Int]()
+                        while outerIndex + 1 < inputDataElements.count, innerIndex < 4 {
                             elements.append(Model.artandlogicDecode(from: inputDataElements[outerIndex] + inputDataElements[outerIndex + 1]) ?? 0)
                             outerIndex += 2
+                            innerIndex += 1
                         }
                         outputString += " "
                         let _ = elements.map { outputString += String($0) + " " }
+                        outputString = outputString.trimmingCharacters(in: .whitespaces)
                         outputString += ";\n"
                     case "MV":
                         Drawing.movePen(pairs: [Drawing.Pair]())
+                        outputString += command
                         outerIndex += 1
-                        while outerIndex < inputDataElements.count,
+                        var elements = [Int]()
+                        while outerIndex + 1 < inputDataElements.count,
                             Drawing.command(input: inputDataElements[outerIndex]) == nil {
                             elements.append(Model.artandlogicDecode(from: inputDataElements[outerIndex] + inputDataElements[outerIndex + 1]) ?? 0)
                             outerIndex += 2
@@ -79,8 +88,10 @@ class ViewController: UIViewController {
                             let isEven = (index + 1) % 2 == 0
                             outputString += (isEven ? ", " : "(") + String(element) + (isEven ? ") " : " ")
                         }
+                        outputString = outputString.trimmingCharacters(in: .whitespaces)
                         outputString += ";\n"
                     default:
+                        print("Unrecognized command: \(inputDataElements[outerIndex]) \(command)")
                         outerIndex += 1
                     }
                 } else {
@@ -92,5 +103,11 @@ class ViewController: UIViewController {
         outputData.text = outputString
     }
 
+}
+
+extension String {
+    func removingWhitespacesAndNewlines() -> String {
+        return components(separatedBy: .whitespacesAndNewlines).joined()
+    }
 }
 

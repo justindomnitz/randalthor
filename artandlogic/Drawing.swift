@@ -107,7 +107,16 @@ class Drawing: NSObject {
         //TO DO
     }
     
+    /*
+     In this system, commands are represented in the data stream by a single (un-encoded) opcode byte that can be identified by always having its most significant bit set, followed by zero or more bytes containing encoded data values. Any unrecognized commands encountered in an input stream should be ignored.
+    */
+    
     static func command(input: String) -> String? {
+        
+        guard let decimalInput = UInt8(input, radix: 16), decimalInput & 0b1000_0000 != 0 else {
+            return nil
+        }
+        
         switch input {
         case "F0":
             return "CLR"
@@ -118,7 +127,7 @@ class Drawing: NSObject {
         case "C0":
             return "MV"
         default:
-            return nil
+            return "UNRECOGNIZED COMMAND"
         }
     }
 }
