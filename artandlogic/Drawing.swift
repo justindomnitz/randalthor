@@ -15,6 +15,7 @@ class Drawing: NSObject {
         var dx_adj: Int
         var dy: Int
         var dy_adj: Int
+        var outOfBounds: Bool
     }
 
     /*

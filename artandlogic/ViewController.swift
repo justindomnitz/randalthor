@@ -42,8 +42,7 @@ class ViewController: UIViewController {
         if let inputData = sender.text?.removingWhitespacesAndNewlines() {
             let inputDataElements = Model.split(inputData, 2)
             var outerIndex = 0
-            var penUp = false
-            var penChange = false
+            var penUp = true
             while outerIndex < inputDataElements.count {
                 if let command = Drawing.command(input: inputDataElements[outerIndex]) {
                     switch command {
@@ -65,7 +64,6 @@ class ViewController: UIViewController {
                                 element = "DOWN"
                                 penUp = false
                             }
-                            penChange = true
                             outputString += " " + element + ";\n"
                         }
                         outerIndex += 2
@@ -100,59 +98,62 @@ class ViewController: UIViewController {
                             let isEven = (index + 1) % 2 == 0
                             if isEven {
                                 if let lastPair = lastPair {
-                                    if penChange {
-                                        penChange = false
-                                        if index > 1 {
-                                            outputString += "MV "
-                                        }
-                                    }
                                     //Absolute coordinates.
-                                    pairs.append(Drawing.Pair(dx: elements[index - 1] + lastPair.dx, dx_adj: elements[index - 1] + lastPair.dx, dy: element + lastPair.dy, dy_adj: element + lastPair.dy))
-                                    var outOfBounds = false
+                                    pairs.append(Drawing.Pair(dx: elements[index - 1] + lastPair.dx,
+                                                              dx_adj: elements[index - 1] + lastPair.dx,
+                                                              dy: element + lastPair.dy,
+                                                              dy_adj: element + lastPair.dy,
+                                                              outOfBounds: false))
                                     let currentIndex = pairs.count - 1
                                     if pairs[currentIndex].dx > 8191 {
                                         pairs[currentIndex].dx_adj = 8191
                                         //TO DO: How do I adjust dy?  Must use trigonometry to figure it out!
                                         pairs[currentIndex].dy_adj = pairs[currentIndex].dy_adj
-                                        outOfBounds = true
+                                        pairs[currentIndex].outOfBounds = true
                                     }
                                     if pairs[currentIndex].dx < -8192 {
                                         pairs[currentIndex].dx_adj = -8192
-                                        outOfBounds = true
+                                        pairs[currentIndex].outOfBounds = true
                                     }
                                     if pairs[currentIndex].dy > 8191 {
                                         pairs[currentIndex].dy_adj = 8191
-                                        outOfBounds = true
+                                        pairs[currentIndex].outOfBounds = true
                                     }
                                     if pairs[currentIndex].dy < -8192 {
                                         pairs[currentIndex].dy_adj = -8192
-                                        outOfBounds = true
+                                        pairs[currentIndex].outOfBounds = true
                                     }
-                                    if outOfBounds {
-                                        outputString += "(" + String(pairs[currentIndex].dx_adj) + ", " + String(pairs[currentIndex].dy_adj) + ") "
+                                    if pairs[currentIndex].outOfBounds {
+                                        //Current point is out of bounds.
                                         if !penUp {
-                                            outputString = outputString.trimmingCharacters(in: .whitespaces) + ";\nPEN UP;\n"
+                                            outputString += "(" + String(pairs[currentIndex].dx_adj) + ", " + String(pairs[currentIndex].dy_adj) + ");\nPEN UP;\n"
                                             penUp = true
-                                            penChange = true
                                         }
                                     } else {
                                         if penUp {
                                             penUp = false
-                                            penChange = true
-                                            //TO DO: Refine the logic below which will or will not log the point at which the drawing reenters the valid grid...
-                                            outputString = outputString.trimmingCharacters(in: .whitespaces) + " (" + String(lastPair.dx_adj) + ", " + String(lastPair.dy_adj) + ");\nPEN DOWN;\nMV (" + String(pairs[currentIndex].dx) + ", " + String(pairs[currentIndex].dy) + ")"
+                                            if lastPair.outOfBounds {
+                                                //Previous point was out of bounds, but now we're back in bounds.
+                                                //Put the pen down where we reenter...
+                                                outputString = outputString.trimmingCharacters(in: .whitespaces) + "MV (" + String(lastPair.dx_adj) + ", " + String(lastPair.dy_adj) + ");\nPEN DOWN;\n"
+                                            }
+                                            outputString = outputString.trimmingCharacters(in: .whitespaces) + "MV (" + String(pairs[currentIndex].dx) + ", " + String(pairs[currentIndex].dy) + ")"
                                         } else {
                                             outputString += "(" + String(pairs[currentIndex].dx) + ", " + String(pairs[currentIndex].dy) + ") "
                                         }
                                     }
-                                } else {
-                                    pairs.append(Drawing.Pair(dx: elements[index - 1], dx_adj: elements[index - 1], dy: element, dy_adj: element))
+                                } else { //f let lastPair = lastPair
+                                    pairs.append(Drawing.Pair(dx: elements[index - 1],
+                                                              dx_adj: elements[index - 1],
+                                                              dy: element,
+                                                              dy_adj: element,
+                                                              outOfBounds: false))
                                     let currentIndex = pairs.count - 1
                                     outputString += "(" + String(pairs[currentIndex].dx) + ", " + String(pairs[currentIndex].dy) + ") "
                                 }
                                 //Set last pair.
                                 lastPair = pairs[pairs.count - 1]
-                            }
+                            } //if isEven
                         }
                         outputString = outputString.trimmingCharacters(in: .whitespaces) + ";\n"
                     default:
