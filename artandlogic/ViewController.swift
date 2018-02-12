@@ -99,35 +99,31 @@ class ViewController: UIViewController {
                             if isEven {
                                 if let lastPair = lastPair {
                                     //Absolute coordinates.
-                                    pairs.append(Drawing.Pair(dx: elements[index - 1] + lastPair.dx,
+                                    pairs.append(Drawing.Pair(dx:     elements[index - 1] + lastPair.dx,
                                                               dx_adj: elements[index - 1] + lastPair.dx,
-                                                              dy: element + lastPair.dy,
+                                                              dy:     element + lastPair.dy,
                                                               dy_adj: element + lastPair.dy,
                                                               outOfBounds: false))
                                     let currentIndex = pairs.count - 1
-                                    if pairs[currentIndex].dx > 8191 {
-                                        pairs[currentIndex].dx_adj = 8191
+                                    if pairs[currentIndex].dx >  8191 ||
+                                       pairs[currentIndex].dx < -8192 ||
+                                       pairs[currentIndex].dy >  8191 ||
+                                       pairs[currentIndex].dy < -8192 {
+                                        
                                         //TO DO: How do I adjust dy?  Must use trigonometry to figure it out!
-                                        pairs[currentIndex].dy_adj = pairs[currentIndex].dy_adj
-                                        pairs[currentIndex].outOfBounds = true
-                                    }
-                                    if pairs[currentIndex].dx < -8192 {
-                                        pairs[currentIndex].dx_adj = -8192
-                                        pairs[currentIndex].outOfBounds = true
-                                    }
-                                    if pairs[currentIndex].dy > 8191 {
-                                        pairs[currentIndex].dy_adj = 8191
-                                        pairs[currentIndex].outOfBounds = true
-                                    }
-                                    if pairs[currentIndex].dy < -8192 {
-                                        pairs[currentIndex].dy_adj = -8192
+
+                                        pairs[currentIndex].dx_adj = min( 8191, pairs[currentIndex].dx_adj)
+                                        pairs[currentIndex].dx_adj = max(-8192, pairs[currentIndex].dx_adj)
+                                        pairs[currentIndex].dy_adj = min( 8191, pairs[currentIndex].dy_adj)
+                                        pairs[currentIndex].dy_adj = max(-8192, pairs[currentIndex].dy_adj)
+                                        
                                         pairs[currentIndex].outOfBounds = true
                                     }
                                     if pairs[currentIndex].outOfBounds {
                                         //Current point is out of bounds.
                                         if !penUp {
-                                            outputString += "(" + String(pairs[currentIndex].dx_adj) + ", " + String(pairs[currentIndex].dy_adj) + ");\nPEN UP;\n"
                                             penUp = true
+                                            outputString += "(" + String(pairs[currentIndex].dx_adj) + ", " + String(pairs[currentIndex].dy_adj) + ");\nPEN UP;\n"
                                         }
                                     } else {
                                         if penUp {
@@ -143,9 +139,9 @@ class ViewController: UIViewController {
                                         }
                                     }
                                 } else { //f let lastPair = lastPair
-                                    pairs.append(Drawing.Pair(dx: elements[index - 1],
+                                    pairs.append(Drawing.Pair(dx:     elements[index - 1],
                                                               dx_adj: elements[index - 1],
-                                                              dy: element,
+                                                              dy:     element,
                                                               dy_adj: element,
                                                               outOfBounds: false))
                                     let currentIndex = pairs.count - 1
