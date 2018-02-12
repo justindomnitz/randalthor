@@ -102,29 +102,34 @@ class ViewController: UIViewController {
                                 if let lastPair = lastPair {
                                     if penChange {
                                         penChange = false
-                                        outputString += "MV "
+                                        if index > 1 {
+                                            outputString += "MV "
+                                        }
                                     }
                                     //Absolute coordinates.
                                     pairs.append(Drawing.Pair(dx: elements[index - 1] + lastPair.dx, dx_adj: elements[index - 1] + lastPair.dx, dy: element + lastPair.dy, dy_adj: element + lastPair.dy))
                                     var outOfBounds = false
-                                    if pairs[pairs.count - 1].dx > 8191 {
-                                        pairs[pairs.count - 1].dx_adj = 8191
+                                    let currentIndex = pairs.count - 1
+                                    if pairs[currentIndex].dx > 8191 {
+                                        pairs[currentIndex].dx_adj = 8191
+                                        //TO DO: How do I adjust dy?  Must use trigonometry to figure it out!
+                                        pairs[currentIndex].dy_adj = pairs[currentIndex].dy_adj
                                         outOfBounds = true
                                     }
-                                    if pairs[pairs.count - 1].dx < -8192 {
-                                        pairs[pairs.count - 1].dx_adj = -8192
+                                    if pairs[currentIndex].dx < -8192 {
+                                        pairs[currentIndex].dx_adj = -8192
                                         outOfBounds = true
                                     }
-                                    if pairs[pairs.count - 1].dy > 8191 {
-                                        pairs[pairs.count - 1].dy_adj = 8191
+                                    if pairs[currentIndex].dy > 8191 {
+                                        pairs[currentIndex].dy_adj = 8191
                                         outOfBounds = true
                                     }
-                                    if pairs[pairs.count - 1].dy < -8192 {
-                                        pairs[pairs.count - 1].dy_adj = -8192
+                                    if pairs[currentIndex].dy < -8192 {
+                                        pairs[currentIndex].dy_adj = -8192
                                         outOfBounds = true
                                     }
                                     if outOfBounds {
-                                        outputString += "(" + String(pairs[pairs.count - 1].dx_adj) + ", " + String(pairs[pairs.count - 1].dy_adj) + ") "
+                                        outputString += "(" + String(pairs[currentIndex].dx_adj) + ", " + String(pairs[currentIndex].dy_adj) + ") "
                                         if !penUp {
                                             outputString = outputString.trimmingCharacters(in: .whitespaces) + ";\nPEN UP;\n"
                                             penUp = true
@@ -134,21 +139,22 @@ class ViewController: UIViewController {
                                         if penUp {
                                             penUp = false
                                             penChange = true
-                                            outputString = outputString.trimmingCharacters(in: .whitespaces) + ";\nPEN DOWN;\nMV (" + String(pairs[pairs.count - 1].dx) + ", " + String(pairs[pairs.count - 1].dy) + ")"
+                                            //TO DO: Refine the logic below which will or will not log the point at which the drawing reenters the valid grid...
+                                            outputString = outputString.trimmingCharacters(in: .whitespaces) + " (" + String(lastPair.dx_adj) + ", " + String(lastPair.dy_adj) + ");\nPEN DOWN;\nMV (" + String(pairs[currentIndex].dx) + ", " + String(pairs[currentIndex].dy) + ")"
                                         } else {
-                                            outputString += "(" + String(pairs[pairs.count - 1].dx) + ", " + String(pairs[pairs.count - 1].dy) + ") "
+                                            outputString += "(" + String(pairs[currentIndex].dx) + ", " + String(pairs[currentIndex].dy) + ") "
                                         }
                                     }
                                 } else {
                                     pairs.append(Drawing.Pair(dx: elements[index - 1], dx_adj: elements[index - 1], dy: element, dy_adj: element))
-                                    outputString += "(" + String(pairs[pairs.count - 1].dx) + ", " + String(pairs[pairs.count - 1].dy) + ") "
+                                    let currentIndex = pairs.count - 1
+                                    outputString += "(" + String(pairs[currentIndex].dx) + ", " + String(pairs[currentIndex].dy) + ") "
                                 }
                                 //Set last pair.
                                 lastPair = pairs[pairs.count - 1]
                             }
                         }
-                        outputString = outputString.trimmingCharacters(in: .whitespaces)
-                        outputString += ";\n"
+                        outputString = outputString.trimmingCharacters(in: .whitespaces) + ";\n"
                     default:
                         print("Unrecognized command: \(inputDataElements[outerIndex]) \(command)")
                         outerIndex += 1
