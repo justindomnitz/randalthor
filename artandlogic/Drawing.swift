@@ -12,7 +12,9 @@ class Drawing: NSObject {
 
     struct Pair {
         var dx: Int
+        var dx_adj: Int
         var dy: Int
+        var dy_adj: Int
     }
 
     /*

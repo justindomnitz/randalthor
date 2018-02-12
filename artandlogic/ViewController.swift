@@ -42,6 +42,8 @@ class ViewController: UIViewController {
         if let inputData = sender.text?.removingWhitespacesAndNewlines() {
             let inputDataElements = Model.split(inputData, 2)
             var outerIndex = 0
+            var penUp = false
+            var penChange = false
             while outerIndex < inputDataElements.count {
                 if let command = Drawing.command(input: inputDataElements[outerIndex]) {
                     switch command {
@@ -55,7 +57,15 @@ class ViewController: UIViewController {
                         outputString += command
                         outerIndex += 1
                         if outerIndex + 1 < inputDataElements.count {
-                            let element = Model.artandlogicDecode(from: inputDataElements[outerIndex] + inputDataElements[outerIndex + 1]) == 0 ? "UP" : "DOWN"
+                            var element = ""
+                            if Model.artandlogicDecode(from: inputDataElements[outerIndex] + inputDataElements[outerIndex + 1]) == 0 {
+                                element = "UP"
+                                penUp = true
+                            } else {
+                                element = "DOWN"
+                                penUp = false
+                            }
+                            penChange = true
                             outputString += " " + element + ";\n"
                         }
                         outerIndex += 2
@@ -76,8 +86,6 @@ class ViewController: UIViewController {
                         outputString += ";\n"
                     case "MV":
                         Drawing.movePen(pairs: [Drawing.Pair]())
-                        var penUp = false
-                        var penChange = false
                         outputString += command + " "
                         outerIndex += 1
                         var elements = [Int]()
@@ -97,42 +105,42 @@ class ViewController: UIViewController {
                                         outputString += "MV "
                                     }
                                     //Absolute coordinates.
-                                    pairs.append(Drawing.Pair(dx: elements[index - 1] + lastPair.dx, dy: element + lastPair.dy))
+                                    pairs.append(Drawing.Pair(dx: elements[index - 1] + lastPair.dx, dx_adj: elements[index - 1] + lastPair.dx, dy: element + lastPair.dy, dy_adj: element + lastPair.dy))
+                                    var outOfBounds = false
                                     if pairs[pairs.count - 1].dx > 8191 {
-                                        pairs[pairs.count - 1].dx = 8191
-                                        outputString += "(" + String(pairs[pairs.count - 1].dx) + ", " + String(pairs[pairs.count - 1].dy) + ") "
-                                        outputString = outputString.trimmingCharacters(in: .whitespaces) + ";\nPEN UP;\n"
-                                        penUp = true
-                                        penChange = true
-                                    } else if pairs[pairs.count - 1].dx < -8192 {
-                                        pairs[pairs.count - 1].dx = -8191
-                                        outputString += "(" + String(pairs[pairs.count - 1].dx) + ", " + String(pairs[pairs.count - 1].dy) + ") "
-                                        outputString = outputString.trimmingCharacters(in: .whitespaces) + ";\nPEN UP;\n"
-                                        penUp = true
-                                        penChange = true
-                                    } else if pairs[pairs.count - 1].dy > 8191 {
-                                        pairs[pairs.count - 1].dy = 8191
-                                        outputString += "(" + String(pairs[pairs.count - 1].dx) + ", " + String(pairs[pairs.count - 1].dy) + ") "
-                                        outputString = outputString.trimmingCharacters(in: .whitespaces) + ";\nPEN UP;\n"
-                                        penUp = true
-                                        penChange = true
-                                    } else if pairs[pairs.count - 1].dy < -8192 {
-                                        pairs[pairs.count - 1].dy = -8191
-                                        outputString += "(" + String(pairs[pairs.count - 1].dx) + ", " + String(pairs[pairs.count - 1].dy) + ") "
-                                        outputString = outputString.trimmingCharacters(in: .whitespaces) + ";\nPEN UP;\n"
-                                        penUp = true
-                                        penChange = true
+                                        pairs[pairs.count - 1].dx_adj = 8191
+                                        outOfBounds = true
+                                    }
+                                    if pairs[pairs.count - 1].dx < -8192 {
+                                        pairs[pairs.count - 1].dx_adj = -8192
+                                        outOfBounds = true
+                                    }
+                                    if pairs[pairs.count - 1].dy > 8191 {
+                                        pairs[pairs.count - 1].dy_adj = 8191
+                                        outOfBounds = true
+                                    }
+                                    if pairs[pairs.count - 1].dy < -8192 {
+                                        pairs[pairs.count - 1].dy_adj = -8192
+                                        outOfBounds = true
+                                    }
+                                    if outOfBounds {
+                                        outputString += "(" + String(pairs[pairs.count - 1].dx_adj) + ", " + String(pairs[pairs.count - 1].dy_adj) + ") "
+                                        if !penUp {
+                                            outputString = outputString.trimmingCharacters(in: .whitespaces) + ";\nPEN UP;\n"
+                                            penUp = true
+                                            penChange = true
+                                        }
                                     } else {
                                         if penUp {
                                             penUp = false
                                             penChange = true
-                                            outputString += "(" + String(pairs[pairs.count - 1].dx) + ", " + String(pairs[pairs.count - 1].dy) + ");\nPEN DOWN;\n"
+                                            outputString = outputString.trimmingCharacters(in: .whitespaces) + ";\nPEN DOWN;\nMV (" + String(pairs[pairs.count - 1].dx) + ", " + String(pairs[pairs.count - 1].dy) + ")"
                                         } else {
                                             outputString += "(" + String(pairs[pairs.count - 1].dx) + ", " + String(pairs[pairs.count - 1].dy) + ") "
                                         }
                                     }
                                 } else {
-                                    pairs.append(Drawing.Pair(dx: elements[index - 1], dy: element))
+                                    pairs.append(Drawing.Pair(dx: elements[index - 1], dx_adj: elements[index - 1], dy: element, dy_adj: element))
                                     outputString += "(" + String(pairs[pairs.count - 1].dx) + ", " + String(pairs[pairs.count - 1].dy) + ") "
                                 }
                                 //Set last pair.
