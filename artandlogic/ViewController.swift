@@ -110,35 +110,20 @@ class ViewController: UIViewController {
                                        pairs[currentIndex].dy >  8191 ||
                                        pairs[currentIndex].dy < -8192 {
                                         
-                                        //TO DO: How do I adjust dy?  Must use trigonometry to figure it out!
-
                                         /*
-                                        let frame = CGRect(x: -1 * (16383 - CGFloat(lastPair.dx)) / 2, y: -1 * (16383 - CGFloat(lastPair.dy)) / 2, width: 16383 - CGFloat(lastPair.dx), height: 16383 - CGFloat(lastPair.dy))
-                                        let startPoint = CGPoint(x: frame.width / 2, y: frame.height / 2)
-                                        let radians = -1 * atan2f(Float(CGFloat(pairs[currentIndex].dy) - CGFloat(lastPair.dy) - startPoint.y), Float(CGFloat(pairs[currentIndex].dx) - CGFloat(lastPair.dx) - startPoint.x))
-                                        let touchPoint = Drawing.radialIntersectionWithRadians(Double(radians), frame: frame)
-                                        print("\(touchPoint.x + CGFloat(lastPair.dx)) \(touchPoint.y + CGFloat(lastPair.dy))")
-                                        */
-                                        
-                                        /*
-                                        let frame = CGRect(x: 0, y: 0, width: 16383, height: 16383)
-                                        let center = CGPoint(x: frame.width / 2, y: frame.height / 2)
-//                                        let radians = atan2f(Float(CGFloat(pairs[currentIndex].dy) - startPoint.y), Float(CGFloat(pairs[currentIndex].dx) - startPoint.x))
-                                        let radians = atan2f(Float(center.y + CGFloat(pairs[currentIndex].dy)), Float(center.x + CGFloat(pairs[currentIndex].dx)))
-                                        let touchPoint = Drawing.radialIntersectionWithRadians(Double(radians), frame: frame)
-                                        print("\(touchPoint.x) \(touchPoint.y)")
-                                        */
-                                        
                                         let distanceFromRightSide:Float = 8191 - Float(lastPair.dx)
                                         let distanceFromRightSideRatio:Float = distanceFromRightSide / Float(lastPair.dx)
                                         let newHeight:Float = distanceFromRightSideRatio * Float(lastPair.dy - pairs[currentIndex].dy)
                                         let touchHeight:Float = Float(lastPair.dy) - newHeight
-                                        pairs[currentIndex].dy_adj = Int(touchHeight) //TO DO: Round up.
+                                        pairs[currentIndex].dy_adj = Int(touchHeight.rounded())
+                                        */
                                         
                                         pairs[currentIndex].dx_adj = min( 8191, pairs[currentIndex].dx_adj)
                                         pairs[currentIndex].dx_adj = max(-8192, pairs[currentIndex].dx_adj)
-//                                        pairs[currentIndex].dy_adj = min( 8191, pairs[currentIndex].dy_adj)
-//                                        pairs[currentIndex].dy_adj = max(-8192, pairs[currentIndex].dy_adj)
+
+                                        //TO DO: Why did lastPair work here for the basic drawing off screen example?
+                                        pairs[currentIndex].dy_adj = min( 8191, pairs[currentIndex].dy_adj)
+                                        pairs[currentIndex].dy_adj = max(-8192, pairs[currentIndex].dy_adj)
                                         
                                         pairs[currentIndex].outOfBounds = true
                                     }
@@ -155,13 +140,18 @@ class ViewController: UIViewController {
                                                 //Previous point was out of bounds, but now we're back in bounds.
                                                 //Put the pen down where we reenter...
                                                 
-                                                let distanceFromRightSide:Float = 8191 - Float(lastPair.dx)
-                                                let distanceFromRightSideRatio:Float = distanceFromRightSide / Float(lastPair.dx)
+                                                /*
+                                                let distanceFromRightSide:Float = 8191 - Float(pairs[currentIndex].dx)
+                                                let distanceFromRightSideRatio:Float = distanceFromRightSide / Float(pairs[currentIndex].dx)
                                                 let newHeight:Float = distanceFromRightSideRatio * Float(lastPair.dy - pairs[currentIndex].dy)
-                                                let touchHeight:Float = Float(lastPair.dy) - newHeight
-                                                pairs[currentIndex].dy_adj = Int(touchHeight) //TO DO: Round up.
+                                                let touchHeight:Float = newHeight - Float(pairs[currentIndex].dy)
+                                                pairs[currentIndex].dy_adj = Int(touchHeight.rounded())
+                                                */
                                                 
-                                                outputString = outputString.trimmingCharacters(in: .whitespaces) + "MV (" + String(pairs[currentIndex].dx_adj) + ", " + String(pairs[currentIndex].dy_adj) + ");\nPEN DOWN;\n"
+                                                //TO DO: Why did lastPair work here for the basic drawing off screen example?
+                                                outputString = outputString.trimmingCharacters(in: .whitespaces) + "MV (" + String(lastPair.dx_adj) + ", " + String(lastPair.dy_adj) + ");\nPEN DOWN;\n"
+                                                
+                                                //outputString = outputString.trimmingCharacters(in: .whitespaces) + "MV (" + String(pairs[currentIndex].dx_adj) + ", " + String(pairs[currentIndex].dy_adj) + ");\nPEN DOWN;\n"
                                             }
                                             outputString = outputString.trimmingCharacters(in: .whitespaces) + "MV (" + String(pairs[currentIndex].dx) + ", " + String(pairs[currentIndex].dy) + ")"
                                         } else {
