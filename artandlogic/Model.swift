@@ -3,7 +3,7 @@
 //  artandlogic
 //
 //  Created by Justin Domnitz on 1/1/18.
-//  Copyright © 2018 Lowyoyo, LLC. All rights reserved.
+//  Copyright (c) 2018 Art & Logic, Inc. All Rights Reserved.
 //
 
 import UIKit
