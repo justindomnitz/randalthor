@@ -162,20 +162,27 @@ class Drawing: NSObject {
                         pairs[currentIndex].dy >  8191 ||
                         pairs[currentIndex].dy < -8192 {
                         
-                        /*
-                         let distanceFromRightSide:Float = 8191 - Float(lastPair.dx)
-                         let distanceFromRightSideRatio:Float = distanceFromRightSide / Float(lastPair.dx)
-                         let newHeight:Float = distanceFromRightSideRatio * Float(lastPair.dy - pairs[currentIndex].dy)
-                         let touchHeight:Float = Float(lastPair.dy) - newHeight
-                         pairs[currentIndex].dy_adj = Int(touchHeight.rounded())
-                         */
+                        if elements[index - 1] == lastPair.dx {
+                            pairs[currentIndex].dx_adj = min( 8191, pairs[currentIndex].dx_adj)
+                            pairs[currentIndex].dx_adj = max(-8192, pairs[currentIndex].dx_adj)
+                        } else {
+                            let distanceFromRightSide:Float = 8191 - Float(lastPair.dy)
+                            let distanceFromRightSideRatio:Float = distanceFromRightSide / Float(lastPair.dy == 0 ? 1 : lastPair.dy)
+                            let newHeight:Float = distanceFromRightSideRatio * Float(lastPair.dx - pairs[currentIndex].dx)
+                            let touchHeight:Float = Float(lastPair.dx) - newHeight
+                            pairs[currentIndex].dx_adj = Int(touchHeight.rounded())
+                        }
                         
-                        pairs[currentIndex].dx_adj = min( 8191, pairs[currentIndex].dx_adj)
-                        pairs[currentIndex].dx_adj = max(-8192, pairs[currentIndex].dx_adj)
-                        
-                        //TO DO: Why did lastPair work here for the basic drawing off screen example?
-                        pairs[currentIndex].dy_adj = min( 8191, pairs[currentIndex].dy_adj)
-                        pairs[currentIndex].dy_adj = max(-8192, pairs[currentIndex].dy_adj)
+                        if elements[index] == lastPair.dy {
+                            pairs[currentIndex].dy_adj = min( 8191, pairs[currentIndex].dy_adj)
+                            pairs[currentIndex].dy_adj = max(-8192, pairs[currentIndex].dy_adj)
+                        } else {
+                            let distanceFromRightSide:Float = 8191 - Float(lastPair.dx)
+                            let distanceFromRightSideRatio:Float = distanceFromRightSide / Float(lastPair.dx == 0 ? 1 : lastPair.dx)
+                            let newHeight:Float = distanceFromRightSideRatio * Float(lastPair.dy - pairs[currentIndex].dy)
+                            let touchHeight:Float = Float(lastPair.dy) - newHeight
+                            pairs[currentIndex].dy_adj = Int(touchHeight.rounded())
+                        }
                         
                         pairs[currentIndex].outOfBounds = true
                     }
@@ -189,21 +196,32 @@ class Drawing: NSObject {
                         if penUp {
                             penUp = false
                             if lastPair.outOfBounds {
+                                
                                 //Previous point was out of bounds, but now we're back in bounds.
                                 //Put the pen down where we reenter...
                                 
-                                /*
-                                 let distanceFromRightSide:Float = 8191 - Float(pairs[currentIndex].dx)
-                                 let distanceFromRightSideRatio:Float = distanceFromRightSide / Float(pairs[currentIndex].dx)
-                                 let newHeight:Float = distanceFromRightSideRatio * Float(lastPair.dy - pairs[currentIndex].dy)
-                                 let touchHeight:Float = newHeight - Float(pairs[currentIndex].dy)
-                                 pairs[currentIndex].dy_adj = Int(touchHeight.rounded())
-                                 */
+                                if elements[index - 1] == lastPair.dx {
+                                    pairs[currentIndex].dx_adj = lastPair.dx_adj
+                                } else {
+                                    let distanceFromRightSide:Float = 8191 - Float(pairs[currentIndex].dy)
+                                    let distanceFromRightSideRatio:Float = distanceFromRightSide / Float(pairs[currentIndex].dy == 0 ? 1 : pairs[currentIndex].dy)
+                                    let newHeight:Float = distanceFromRightSideRatio * Float(lastPair.dx - pairs[currentIndex].dx)
+                                    let touchHeight:Float = newHeight - Float(pairs[currentIndex].dx)
+                                    pairs[currentIndex].dx_adj = Int(touchHeight.rounded())
+                                }
                                 
-                                //TO DO: Why did lastPair work here for the basic drawing off screen example?
-                                outputString = outputString.trimmingCharacters(in: .whitespaces) + "MV (" + String(lastPair.dx_adj) + ", " + String(lastPair.dy_adj) + ");\nPEN DOWN;\n"
+                                if elements[index] == lastPair.dy {
+                                    pairs[currentIndex].dy_adj = lastPair.dy_adj
+                                } else {
+                                    let distanceFromRightSide:Float = 8191 - Float(pairs[currentIndex].dx)
+                                    let distanceFromRightSideRatio:Float = distanceFromRightSide / Float(pairs[currentIndex].dx == 0 ? 1 : pairs[currentIndex].dx)
+                                    let newHeight:Float = distanceFromRightSideRatio * Float(lastPair.dy - pairs[currentIndex].dy)
+                                    let touchHeight:Float = newHeight - Float(pairs[currentIndex].dy)
+                                    pairs[currentIndex].dy_adj = Int(touchHeight.rounded())
+                                }
+
+                                outputString = outputString.trimmingCharacters(in: .whitespaces) + "MV (" + String(pairs[currentIndex].dx_adj) + ", " + String(pairs[currentIndex].dy_adj) + ");\nPEN DOWN;\n"
                                 
-                                //outputString = outputString.trimmingCharacters(in: .whitespaces) + "MV (" + String(pairs[currentIndex].dx_adj) + ", " + String(pairs[currentIndex].dy_adj) + ");\nPEN DOWN;\n"
                             }
                             outputString = outputString.trimmingCharacters(in: .whitespaces) + "MV (" + String(pairs[currentIndex].dx) + ", " + String(pairs[currentIndex].dy) + ")"
                         } else {
