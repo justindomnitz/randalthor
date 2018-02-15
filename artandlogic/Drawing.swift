@@ -17,7 +17,17 @@ class Drawing: NSObject {
         var dy: Int
         var dx_adj: Int
         var dy_adj: Int
-        var outOfBounds: Bool
+        
+        func adjString() -> String {
+            return "(" + String(dx_adj) + ", " + String(dy_adj) + ")"
+        }
+        
+        func outOfBounds() -> Bool {
+            return dx > Constants.UpperLimit ||
+                   dx < Constants.LowerLimit ||
+                   dy > Constants.UpperLimit ||
+                   dy < Constants.LowerLimit
+        }
     }
 
     /**
@@ -154,8 +164,7 @@ class Drawing: NSObject {
         //Make pairs.
         var pairs = [Drawing.Pair]()
         for (index, _) in coordinates.enumerated() {
-            let isEven = (index + 1) % 2 == 0
-            if isEven {
+            if (index + 1) % 2 == 0 { //Complete pair.
                 
                 //Set our last pair from the passed in parameter or from the previous pair if there is one.
                 let lastPair = (pairs.count > 0 ? pairs[pairs.count - 1] : nil) ?? inputOutputlastPair
@@ -165,23 +174,18 @@ class Drawing: NSObject {
                                           dx:      coordinates[index - 1] + (lastPair?.dx ?? 0),
                                           dy:      coordinates[index]     + (lastPair?.dy ?? 0),
                                           dx_adj:  coordinates[index - 1] + (lastPair?.dx ?? 0),
-                                          dy_adj:  coordinates[index]     + (lastPair?.dy ?? 0),
-                                          outOfBounds: false))
+                                          dy_adj:  coordinates[index]     + (lastPair?.dy ?? 0)))
                 
                 let currentIndex = pairs.count - 1
                 
-                //Handle our pair if we've gone out of bounds.
-                if pairs[currentIndex].dx >  8191 ||
-                    pairs[currentIndex].dx < -8192 ||
-                    pairs[currentIndex].dy >  8191 ||
-                    pairs[currentIndex].dy < -8192 {
-                    
+                //Adjust our pair if we've gone out of bounds.
+                if pairs[currentIndex].outOfBounds() {
                     if let lastPair = lastPair  {
                         if pairs[currentIndex].dx == lastPair.dx {
-                            pairs[currentIndex].dx_adj = min( 8191, pairs[currentIndex].dx_adj)
-                            pairs[currentIndex].dx_adj = max(-8192, pairs[currentIndex].dx_adj)
+                            pairs[currentIndex].dx_adj = min(Constants.UpperLimit, pairs[currentIndex].dx_adj)
+                            pairs[currentIndex].dx_adj = max(Constants.LowerLimit, pairs[currentIndex].dx_adj)
                         } else {
-                            let distanceFromRightSide:Float = 8191 - Float(lastPair.dy)
+                            let distanceFromRightSide:Float = Float(Constants.UpperLimit - lastPair.dy)
                             let distanceFromRightSideRatio:Float = distanceFromRightSide / Float(lastPair.dy == 0 ? 1 : lastPair.dy)
                             let newHeight:Float = distanceFromRightSideRatio * Float(lastPair.dx - pairs[currentIndex].dx)
                             let touchHeight:Float = Float(lastPair.dx) - newHeight
@@ -189,34 +193,32 @@ class Drawing: NSObject {
                         }
                         
                         if pairs[currentIndex].dy == lastPair.dy {
-                            pairs[currentIndex].dy_adj = min( 8191, pairs[currentIndex].dy_adj)
-                            pairs[currentIndex].dy_adj = max(-8192, pairs[currentIndex].dy_adj)
+                            pairs[currentIndex].dy_adj = min(Constants.UpperLimit, pairs[currentIndex].dy_adj)
+                            pairs[currentIndex].dy_adj = max(Constants.LowerLimit, pairs[currentIndex].dy_adj)
                         } else {
-                            let distanceFromRightSide:Float = 8191 - Float(lastPair.dx)
+                            let distanceFromRightSide:Float = Float(Constants.UpperLimit - lastPair.dx)
                             let distanceFromRightSideRatio:Float = distanceFromRightSide / Float(lastPair.dx == 0 ? 1 : lastPair.dx)
                             let newHeight:Float = distanceFromRightSideRatio * Float(lastPair.dy - pairs[currentIndex].dy)
                             let touchHeight:Float = Float(lastPair.dy) - newHeight
                             pairs[currentIndex].dy_adj = Int(touchHeight.rounded())
                         }
                     }
-                    
-                    pairs[currentIndex].outOfBounds = true
                 }
                 
                 //Out of bounds.
-                if pairs[currentIndex].outOfBounds && !penUp {
+                if pairs[currentIndex].outOfBounds() && !penUp {
                     //Current point is out of bounds and the pen is down.
                     
                     //Move to our adjusted location.
-                    outputString += "(" + String(pairs[currentIndex].dx_adj) + ", " + String(pairs[currentIndex].dy_adj) + ");\n"
+                    outputString += pairs[currentIndex].adjString() + Constants.NewLine
                     
                     //Lift the pen.
                     penUp = true
-                    outputString += "PEN UP;\n"
+                    outputString += Constants.PenText + Constants.Space + Constants.Up + Constants.NewLine
                 }
                 
                 //Out of bounds.
-                if pairs[currentIndex].outOfBounds && !penUp {
+                if pairs[currentIndex].outOfBounds() && !penUp {
                     //Current point is out of bounds and the pen is down.
                     
                     //Invalid.  Should not be any way of getting here.
@@ -224,10 +226,10 @@ class Drawing: NSObject {
                 }
                 
                 //In bounds.
-                if !pairs[currentIndex].outOfBounds {
-                    //Current point is in bounds and the pen is down.
+                if !pairs[currentIndex].outOfBounds() {
+                    //Current point is in bounds.
 
-                    if let lastPair = lastPair, lastPair.outOfBounds, penUp {
+                    if let lastPair = lastPair, lastPair.outOfBounds(), penUp {
                         //Last point was out of bounds and we are now in bounds and the pen is up.
                         
                         //Move to the point where we enter the bounds...
@@ -235,34 +237,34 @@ class Drawing: NSObject {
                         var reentryPair = pairs[currentIndex]
                         
                         if pairs[currentIndex].dy == lastPair.dy {
-                            reentryPair.dy_adj = min( 8191, pairs[currentIndex].dy_adj)
-                            reentryPair.dy_adj = max(-8192, pairs[currentIndex].dy_adj)
+                            reentryPair.dy_adj = min(Constants.UpperLimit, pairs[currentIndex].dy_adj)
+                            reentryPair.dy_adj = max(Constants.LowerLimit, pairs[currentIndex].dy_adj)
                         } else {
-                            let distanceFromRightSide:Float = 8191 - Float(pairs[currentIndex].dy)
+                            let distanceFromRightSide:Float = Float(Constants.UpperLimit - pairs[currentIndex].dy)
                             let distanceFromRightSideRatio:Float = distanceFromRightSide / Float(pairs[currentIndex].dy == 0 ? 1 : pairs[currentIndex].dy)
                             let newHeight:Float = distanceFromRightSideRatio * Float(lastPair.dx - pairs[currentIndex].dx)
                             let touchHeight:Float = newHeight - Float(pairs[currentIndex].dx)
-                            reentryPair.dy_adj = 8191
+                            reentryPair.dy_adj = Constants.UpperLimit
                             reentryPair.dx_adj = Int(touchHeight.rounded())
                         }
                         
                         if pairs[currentIndex].dx == lastPair.dx {
-                            reentryPair.dx_adj = min( 8191, pairs[currentIndex].dx_adj)
-                            reentryPair.dx_adj = max(-8192, pairs[currentIndex].dx_adj)
+                            reentryPair.dx_adj = min(Constants.UpperLimit, pairs[currentIndex].dx_adj)
+                            reentryPair.dx_adj = max(Constants.LowerLimit, pairs[currentIndex].dx_adj)
                         } else {
-                            let distanceFromRightSide:Float = 8191 - Float(pairs[currentIndex].dx)
+                            let distanceFromRightSide:Float = Float(Constants.UpperLimit - pairs[currentIndex].dx)
                             let distanceFromRightSideRatio:Float = distanceFromRightSide / Float(pairs[currentIndex].dx == 0 ? 1 : pairs[currentIndex].dx)
                             let newHeight:Float = distanceFromRightSideRatio * Float(lastPair.dy - pairs[currentIndex].dy)
                             let touchHeight:Float = newHeight - Float(pairs[currentIndex].dy)
-                            reentryPair.dx_adj = 8191
+                            reentryPair.dx_adj = Constants.UpperLimit
                             reentryPair.dy_adj = Int(touchHeight.rounded())
                         }
                         
-                        outputString += "MV (" + String(reentryPair.dx_adj) + ", " + String(reentryPair.dy_adj) + ");\n"
+                        outputString += Constants.MoveText + Constants.Space + reentryPair.adjString() + Constants.NewLine
                         
                         //...Then, put pen down.
                         penUp = false
-                        outputString += "PEN DOWN;\nMV "
+                        outputString += Constants.PenText + Constants.Space + Constants.Down + Constants.NewLine + Constants.MoveText + Constants.Space
                     } else {
                         //Last point was in bounds.
                         
@@ -270,14 +272,14 @@ class Drawing: NSObject {
                     }
                     
                     //Move to our adjusted location.
-                    outputString += "(" + String(pairs[currentIndex].dx_adj) + ", " + String(pairs[currentIndex].dy_adj) + ") "
+                    outputString += pairs[currentIndex].adjString() + Constants.Space
                 }
                 
             } //if isEven
         }
 
         //Remove any extra white space and add a cariage return before exiting.
-        outputString = outputString.trimmingCharacters(in: .whitespaces) + ";\n"
+        outputString = outputString.trimmingCharacters(in: .whitespaces) + Constants.NewLine
  
         //Set our last pair before exiting.
         inputOutputlastPair = pairs.count > 0 ? pairs[pairs.count - 1] : nil

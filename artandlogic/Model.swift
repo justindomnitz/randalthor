@@ -98,7 +98,7 @@ class Model: NSObject {
     //This function needs to accept a signed integer in the 14-bit range [-8192..+8191] and return a 4 character string.
     static func artandlogicEncode(from: Int) -> String? {
         
-        guard from >= -8192 && from <= 8191 else {
+        guard from >= Constants.LowerLimit && from <= Constants.UpperLimit else {
             return nil
         }
         

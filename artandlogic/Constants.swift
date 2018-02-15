@@ -12,10 +12,15 @@ struct Constants {
     
     static let ErrorMessage = "ERROR"
  
+    //Boundaries
+    static let UpperLimit:Int =  8191
+    static let LowerLimit:Int = -8192
+
+    //String manipulation
     static let NewLine = ";\n"
-    static let Space = " "
-    static let Up = "UP"
-    static let Down = "DOWN"
+    static let Space   = " "
+    static let Up      = "UP"
+    static let Down    = "DOWN"
     
     //Command code
     static let ClearCode = "F0"
