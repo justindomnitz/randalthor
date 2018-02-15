@@ -234,33 +234,29 @@ class Drawing: NSObject {
 
                         var reentryPair = pairs[currentIndex]
                         
-                        if pairs[currentIndex].dx == lastPair.dx {
-                            reentryPair.dy_adj = 8191
-                        }
-                        
-                        /*
-                        else {
+                        if pairs[currentIndex].dy == lastPair.dy {
+                            reentryPair.dy_adj = min( 8191, pairs[currentIndex].dy_adj)
+                            reentryPair.dy_adj = max(-8192, pairs[currentIndex].dy_adj)
+                        } else {
                             let distanceFromRightSide:Float = 8191 - Float(pairs[currentIndex].dy)
                             let distanceFromRightSideRatio:Float = distanceFromRightSide / Float(pairs[currentIndex].dy == 0 ? 1 : pairs[currentIndex].dy)
                             let newHeight:Float = distanceFromRightSideRatio * Float(lastPair.dx - pairs[currentIndex].dx)
                             let touchHeight:Float = newHeight - Float(pairs[currentIndex].dx)
+                            reentryPair.dy_adj = 8191
                             reentryPair.dx_adj = Int(touchHeight.rounded())
                         }
-                        */
                         
-                        if pairs[currentIndex].dy == lastPair.dy {
-                            reentryPair.dx_adj = 8191
-                        }
-                        
-                        /*
-                        else {
+                        if pairs[currentIndex].dx == lastPair.dx {
+                            reentryPair.dx_adj = min( 8191, pairs[currentIndex].dx_adj)
+                            reentryPair.dx_adj = max(-8192, pairs[currentIndex].dx_adj)
+                        } else {
                             let distanceFromRightSide:Float = 8191 - Float(pairs[currentIndex].dx)
                             let distanceFromRightSideRatio:Float = distanceFromRightSide / Float(pairs[currentIndex].dx == 0 ? 1 : pairs[currentIndex].dx)
                             let newHeight:Float = distanceFromRightSideRatio * Float(lastPair.dy - pairs[currentIndex].dy)
                             let touchHeight:Float = newHeight - Float(pairs[currentIndex].dy)
+                            reentryPair.dx_adj = 8191
                             reentryPair.dy_adj = Int(touchHeight.rounded())
                         }
-                        */
                         
                         outputString += "MV (" + String(reentryPair.dx_adj) + ", " + String(reentryPair.dy_adj) + ");\n"
                         
@@ -284,7 +280,7 @@ class Drawing: NSObject {
         outputString = outputString.trimmingCharacters(in: .whitespaces) + ";\n"
  
         //Set our last pair before exiting.
-        inputOutputlastPair = pairs[pairs.count - 1]
+        inputOutputlastPair = pairs.count > 0 ? pairs[pairs.count - 1] : nil
     }
     
     /**
