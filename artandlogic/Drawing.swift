@@ -275,7 +275,7 @@ class Drawing: NSObject {
                     outputString += pairs[currentIndex].adjString() + Constants.Space
                 }
                 
-            } //if isEven
+            } //if (index + 1) % 2 == 0
         }
 
         //Remove any extra white space and add a cariage return before exiting.
