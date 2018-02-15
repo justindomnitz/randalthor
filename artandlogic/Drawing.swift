@@ -185,9 +185,9 @@ class Drawing: NSObject {
                             pairs[currentIndex].dx_adj = min(Constants.UpperLimit, pairs[currentIndex].dx_adj)
                             pairs[currentIndex].dx_adj = max(Constants.LowerLimit, pairs[currentIndex].dx_adj)
                         } else {
-                            let distanceFromRightSide:Float = Float(Constants.UpperLimit - lastPair.dy)
-                            let distanceFromRightSideRatio:Float = distanceFromRightSide / Float(lastPair.dy == 0 ? 1 : lastPair.dy)
-                            let newHeight:Float = distanceFromRightSideRatio * Float(lastPair.dx - pairs[currentIndex].dx)
+                            let distanceFromSide:Float = Float(Constants.UpperLimit - lastPair.dy)
+                            let distanceFromSideRatio:Float = distanceFromSide / Float(lastPair.dy == 0 ? 1 : lastPair.dy)
+                            let newHeight:Float = distanceFromSideRatio * Float(lastPair.dx - pairs[currentIndex].dx)
                             let touchHeight:Float = Float(lastPair.dx) - newHeight
                             pairs[currentIndex].dx_adj = Int(touchHeight.rounded())
                         }
@@ -196,9 +196,9 @@ class Drawing: NSObject {
                             pairs[currentIndex].dy_adj = min(Constants.UpperLimit, pairs[currentIndex].dy_adj)
                             pairs[currentIndex].dy_adj = max(Constants.LowerLimit, pairs[currentIndex].dy_adj)
                         } else {
-                            let distanceFromRightSide:Float = Float(Constants.UpperLimit - lastPair.dx)
-                            let distanceFromRightSideRatio:Float = distanceFromRightSide / Float(lastPair.dx == 0 ? 1 : lastPair.dx)
-                            let newHeight:Float = distanceFromRightSideRatio * Float(lastPair.dy - pairs[currentIndex].dy)
+                            let distanceFromSide:Float = Float(Constants.UpperLimit - lastPair.dx)
+                            let distanceFromSideRatio:Float = distanceFromSide / Float(lastPair.dx == 0 ? 1 : lastPair.dx)
+                            let newHeight:Float = distanceFromSideRatio * Float(lastPair.dy - pairs[currentIndex].dy)
                             let touchHeight:Float = Float(lastPair.dy) - newHeight
                             pairs[currentIndex].dy_adj = Int(touchHeight.rounded())
                         }
@@ -240,9 +240,9 @@ class Drawing: NSObject {
                             reentryPair.dy_adj = min(Constants.UpperLimit, pairs[currentIndex].dy_adj)
                             reentryPair.dy_adj = max(Constants.LowerLimit, pairs[currentIndex].dy_adj)
                         } else {
-                            let distanceFromRightSide:Float = Float(Constants.UpperLimit - pairs[currentIndex].dy)
-                            let distanceFromRightSideRatio:Float = distanceFromRightSide / Float(pairs[currentIndex].dy == 0 ? 1 : pairs[currentIndex].dy)
-                            let newHeight:Float = distanceFromRightSideRatio * Float(lastPair.dx - pairs[currentIndex].dx)
+                            let distanceFromSide:Float = Float(Constants.UpperLimit - pairs[currentIndex].dy)
+                            let distanceFromSideRatio:Float = distanceFromSide / Float(pairs[currentIndex].dy == 0 ? 1 : pairs[currentIndex].dy)
+                            let newHeight:Float = distanceFromSideRatio * Float(lastPair.dx - pairs[currentIndex].dx)
                             let touchHeight:Float = newHeight - Float(pairs[currentIndex].dx)
                             reentryPair.dy_adj = Constants.UpperLimit
                             reentryPair.dx_adj = Int(touchHeight.rounded())
@@ -252,9 +252,9 @@ class Drawing: NSObject {
                             reentryPair.dx_adj = min(Constants.UpperLimit, pairs[currentIndex].dx_adj)
                             reentryPair.dx_adj = max(Constants.LowerLimit, pairs[currentIndex].dx_adj)
                         } else {
-                            let distanceFromRightSide:Float = Float(Constants.UpperLimit - pairs[currentIndex].dx)
-                            let distanceFromRightSideRatio:Float = distanceFromRightSide / Float(pairs[currentIndex].dx == 0 ? 1 : pairs[currentIndex].dx)
-                            let newHeight:Float = distanceFromRightSideRatio * Float(lastPair.dy - pairs[currentIndex].dy)
+                            let distanceFromSide:Float = Float(Constants.UpperLimit - pairs[currentIndex].dx)
+                            let distanceFromSideRatio:Float = distanceFromSide / Float(pairs[currentIndex].dx == 0 ? 1 : pairs[currentIndex].dx)
+                            let newHeight:Float = distanceFromSideRatio * Float(lastPair.dy - pairs[currentIndex].dy)
                             let touchHeight:Float = newHeight - Float(pairs[currentIndex].dy)
                             reentryPair.dx_adj = Constants.UpperLimit
                             reentryPair.dy_adj = Int(touchHeight.rounded())
