@@ -14,6 +14,8 @@ struct Constants {
  
     static let NewLine = ";\n"
     static let Space = " "
+    static let Up = "UP"
+    static let Down = "DOWN"
     
     //Command code
     static let ClearCode = "F0"

@@ -53,7 +53,7 @@ class ViewController: UIViewController {
                     case Constants.ColorText:
                         Drawing.setColor(command: command, inputDataElements: inputDataElements, outputString: &outputString, outerIndex: &outerIndex)
                     case Constants.MoveText:
-                        Drawing.movePen(command: command, inputDataElements: inputDataElements, penUp: &penUp, outputString: &outputString, outerIndex: &outerIndex, lastPair: &lastPair)
+                        Drawing.movePen(command: command, inputDataElements: inputDataElements, penUp: &penUp, outputString: &outputString, outerIndex: &outerIndex, inputOutputlastPair: &lastPair)
                     default:
                         print("Unrecognized command: \(inputDataElements[outerIndex]) \(command)")
                         outerIndex += 1

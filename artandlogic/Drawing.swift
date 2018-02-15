@@ -11,9 +11,11 @@ import UIKit
 class Drawing: NSObject {
 
     struct Pair {
+        var dx_orig: Int
+        var dy_orig: Int
         var dx: Int
-        var dx_adj: Int
         var dy: Int
+        var dx_adj: Int
         var dy_adj: Int
         var outOfBounds: Bool
     }
@@ -65,10 +67,10 @@ class Drawing: NSObject {
         if outerIndex + 1 < inputDataElements.count {
             var element = ""
             if Model.artandlogicDecode(from: inputDataElements[outerIndex] + inputDataElements[outerIndex + 1]) == 0 {
-                element = "UP"
+                element = Constants.Up
                 penUp = true
             } else {
-                element = "DOWN"
+                element = Constants.Down
                 penUp = false
             }
             outputString += Constants.Space + element + Constants.NewLine
@@ -135,34 +137,47 @@ class Drawing: NSObject {
      * If the specified motion takes the pen outside the allowed bounds of (-8192, -8192) .. (8191, 8191), the pen should move until it crosses that boundary and then lift. When additional movement commands bring the pen back into the valid coordinate space, the pen should be placed down at the boundary and draw to the next position in the data file.
      */
     
-    static func movePen(command:String, inputDataElements: [String], penUp: inout Bool, outputString: inout String, outerIndex: inout Int, lastPair: inout Drawing.Pair?) {
+    static func movePen(command:String, inputDataElements: [String], penUp: inout Bool, outputString: inout String, outerIndex: inout Int, inputOutputlastPair: inout Drawing.Pair?) {
+        
+        //Add the MV command.
         outputString += command + Constants.Space
         outerIndex += 1
-        var elements = [Int]()
+        
+        //Build a list of our x and y points.
+        var coordinates = [Int]()
         while outerIndex + 1 < inputDataElements.count,
             Drawing.command(input: inputDataElements[outerIndex]) == nil {
-                elements.append(Model.artandlogicDecode(from: inputDataElements[outerIndex] + inputDataElements[outerIndex + 1]) ?? 0)
+                coordinates.append(Model.artandlogicDecode(from: inputDataElements[outerIndex] + inputDataElements[outerIndex + 1]) ?? 0)
                 outerIndex += 2
         }
+        
         //Make pairs.
         var pairs = [Drawing.Pair]()
-        for (index, element) in elements.enumerated() {
+        for (index, _) in coordinates.enumerated() {
             let isEven = (index + 1) % 2 == 0
             if isEven {
-                if let lastPair = lastPair {
-                    //Absolute coordinates.
-                    pairs.append(Drawing.Pair(dx:     elements[index - 1] + lastPair.dx,
-                                              dx_adj: elements[index - 1] + lastPair.dx,
-                                              dy:     element + lastPair.dy,
-                                              dy_adj: element + lastPair.dy,
-                                              outOfBounds: false))
-                    let currentIndex = pairs.count - 1
-                    if pairs[currentIndex].dx >  8191 ||
-                        pairs[currentIndex].dx < -8192 ||
-                        pairs[currentIndex].dy >  8191 ||
-                        pairs[currentIndex].dy < -8192 {
-                        
-                        if elements[index - 1] == lastPair.dx {
+                
+                //Set our last pair from the passed in parameter or from the previous pair if there is one.
+                let lastPair = (pairs.count > 0 ? pairs[pairs.count - 1] : nil) ?? inputOutputlastPair
+                
+                pairs.append(Drawing.Pair(dx_orig: coordinates[index - 1]                     ,
+                                          dy_orig: coordinates[index]                         ,
+                                          dx:      coordinates[index - 1] + (lastPair?.dx ?? 0),
+                                          dy:      coordinates[index]     + (lastPair?.dy ?? 0),
+                                          dx_adj:  coordinates[index - 1] + (lastPair?.dx ?? 0),
+                                          dy_adj:  coordinates[index]     + (lastPair?.dy ?? 0),
+                                          outOfBounds: false))
+                
+                let currentIndex = pairs.count - 1
+                
+                //Handle our pair if we've gone out of bounds.
+                if pairs[currentIndex].dx >  8191 ||
+                    pairs[currentIndex].dx < -8192 ||
+                    pairs[currentIndex].dy >  8191 ||
+                    pairs[currentIndex].dy < -8192 {
+                    
+                    if let lastPair = lastPair  {
+                        if pairs[currentIndex].dx == lastPair.dx {
                             pairs[currentIndex].dx_adj = min( 8191, pairs[currentIndex].dx_adj)
                             pairs[currentIndex].dx_adj = max(-8192, pairs[currentIndex].dx_adj)
                         } else {
@@ -173,7 +188,7 @@ class Drawing: NSObject {
                             pairs[currentIndex].dx_adj = Int(touchHeight.rounded())
                         }
                         
-                        if elements[index] == lastPair.dy {
+                        if pairs[currentIndex].dy == lastPair.dy {
                             pairs[currentIndex].dy_adj = min( 8191, pairs[currentIndex].dy_adj)
                             pairs[currentIndex].dy_adj = max(-8192, pairs[currentIndex].dy_adj)
                         } else {
@@ -183,65 +198,93 @@ class Drawing: NSObject {
                             let touchHeight:Float = Float(lastPair.dy) - newHeight
                             pairs[currentIndex].dy_adj = Int(touchHeight.rounded())
                         }
-                        
-                        pairs[currentIndex].outOfBounds = true
                     }
-                    if pairs[currentIndex].outOfBounds {
-                        //Current point is out of bounds.
-                        if !penUp {
-                            penUp = true
-                            outputString += "(" + String(pairs[currentIndex].dx_adj) + ", " + String(pairs[currentIndex].dy_adj) + ");\nPEN UP;\n"
-                        }
-                    } else {
-                        if penUp {
-                            penUp = false
-                            if lastPair.outOfBounds {
-                                
-                                //Previous point was out of bounds, but now we're back in bounds.
-                                //Put the pen down where we reenter...
-                                
-                                if elements[index - 1] == lastPair.dx {
-                                    pairs[currentIndex].dx_adj = lastPair.dx_adj
-                                } else {
-                                    let distanceFromRightSide:Float = 8191 - Float(pairs[currentIndex].dy)
-                                    let distanceFromRightSideRatio:Float = distanceFromRightSide / Float(pairs[currentIndex].dy == 0 ? 1 : pairs[currentIndex].dy)
-                                    let newHeight:Float = distanceFromRightSideRatio * Float(lastPair.dx - pairs[currentIndex].dx)
-                                    let touchHeight:Float = newHeight - Float(pairs[currentIndex].dx)
-                                    pairs[currentIndex].dx_adj = Int(touchHeight.rounded())
-                                }
-                                
-                                if elements[index] == lastPair.dy {
-                                    pairs[currentIndex].dy_adj = lastPair.dy_adj
-                                } else {
-                                    let distanceFromRightSide:Float = 8191 - Float(pairs[currentIndex].dx)
-                                    let distanceFromRightSideRatio:Float = distanceFromRightSide / Float(pairs[currentIndex].dx == 0 ? 1 : pairs[currentIndex].dx)
-                                    let newHeight:Float = distanceFromRightSideRatio * Float(lastPair.dy - pairs[currentIndex].dy)
-                                    let touchHeight:Float = newHeight - Float(pairs[currentIndex].dy)
-                                    pairs[currentIndex].dy_adj = Int(touchHeight.rounded())
-                                }
-
-                                outputString = outputString.trimmingCharacters(in: .whitespaces) + "MV (" + String(pairs[currentIndex].dx_adj) + ", " + String(pairs[currentIndex].dy_adj) + ");\nPEN DOWN;\n"
-                                
-                            }
-                            outputString = outputString.trimmingCharacters(in: .whitespaces) + "MV (" + String(pairs[currentIndex].dx) + ", " + String(pairs[currentIndex].dy) + ")"
-                        } else {
-                            outputString += "(" + String(pairs[currentIndex].dx) + ", " + String(pairs[currentIndex].dy) + ") "
-                        }
-                    }
-                } else { //f let lastPair = lastPair
-                    pairs.append(Drawing.Pair(dx:     elements[index - 1],
-                                              dx_adj: elements[index - 1],
-                                              dy:     element,
-                                              dy_adj: element,
-                                              outOfBounds: false))
-                    let currentIndex = pairs.count - 1
-                    outputString += "(" + String(pairs[currentIndex].dx) + ", " + String(pairs[currentIndex].dy) + ") "
+                    
+                    pairs[currentIndex].outOfBounds = true
                 }
-                //Set last pair.
-                lastPair = pairs[pairs.count - 1]
+                
+                //Out of bounds.
+                if pairs[currentIndex].outOfBounds && !penUp {
+                    //Current point is out of bounds and the pen is down.
+                    
+                    //Move to our adjusted location.
+                    outputString += "(" + String(pairs[currentIndex].dx_adj) + ", " + String(pairs[currentIndex].dy_adj) + ");\n"
+                    
+                    //Lift the pen.
+                    penUp = true
+                    outputString += "PEN UP;\n"
+                }
+                
+                //Out of bounds.
+                if pairs[currentIndex].outOfBounds && !penUp {
+                    //Current point is out of bounds and the pen is down.
+                    
+                    //Invalid.  Should not be any way of getting here.
+                    print(Constants.ErrorMessage)
+                }
+                
+                //In bounds.
+                if !pairs[currentIndex].outOfBounds {
+                    //Current point is in bounds and the pen is down.
+
+                    if let lastPair = lastPair, lastPair.outOfBounds, penUp {
+                        //Last point was out of bounds and we are now in bounds and the pen is up.
+                        
+                        //Move to the point where we enter the bounds...
+
+                        var reentryPair = pairs[currentIndex]
+                        
+                        if pairs[currentIndex].dx == lastPair.dx {
+                            reentryPair.dy_adj = 8191
+                        }
+                        
+                        /*
+                        else {
+                            let distanceFromRightSide:Float = 8191 - Float(pairs[currentIndex].dy)
+                            let distanceFromRightSideRatio:Float = distanceFromRightSide / Float(pairs[currentIndex].dy == 0 ? 1 : pairs[currentIndex].dy)
+                            let newHeight:Float = distanceFromRightSideRatio * Float(lastPair.dx - pairs[currentIndex].dx)
+                            let touchHeight:Float = newHeight - Float(pairs[currentIndex].dx)
+                            reentryPair.dx_adj = Int(touchHeight.rounded())
+                        }
+                        */
+                        
+                        if pairs[currentIndex].dy == lastPair.dy {
+                            reentryPair.dx_adj = 8191
+                        }
+                        
+                        /*
+                        else {
+                            let distanceFromRightSide:Float = 8191 - Float(pairs[currentIndex].dx)
+                            let distanceFromRightSideRatio:Float = distanceFromRightSide / Float(pairs[currentIndex].dx == 0 ? 1 : pairs[currentIndex].dx)
+                            let newHeight:Float = distanceFromRightSideRatio * Float(lastPair.dy - pairs[currentIndex].dy)
+                            let touchHeight:Float = newHeight - Float(pairs[currentIndex].dy)
+                            reentryPair.dy_adj = Int(touchHeight.rounded())
+                        }
+                        */
+                        
+                        outputString += "MV (" + String(reentryPair.dx_adj) + ", " + String(reentryPair.dy_adj) + ");\n"
+                        
+                        //...Then, put pen down.
+                        penUp = false
+                        outputString += "PEN DOWN;\nMV "
+                    } else {
+                        //Last point was in bounds.
+                        
+                        //Do nothing.
+                    }
+                    
+                    //Move to our adjusted location.
+                    outputString += "(" + String(pairs[currentIndex].dx_adj) + ", " + String(pairs[currentIndex].dy_adj) + ") "
+                }
+                
             } //if isEven
         }
+
+        //Remove any extra white space and add a cariage return before exiting.
         outputString = outputString.trimmingCharacters(in: .whitespaces) + ";\n"
+ 
+        //Set our last pair before exiting.
+        inputOutputlastPair = pairs[pairs.count - 1]
     }
     
     /**
